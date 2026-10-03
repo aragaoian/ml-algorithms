@@ -1,5 +1,5 @@
 import numpy as np
-from Utils.weights import Weights
+from utils.weights import Weights
 
 
 class Regression:
