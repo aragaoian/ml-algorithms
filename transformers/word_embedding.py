@@ -2,7 +2,6 @@ import numpy as np
 import numpy.typing as npt
 
 from utils.activation_functions import ActivionFunctions
-from utils.weights import Weights
 
 
 class WordEmbedding:
@@ -36,7 +35,7 @@ class WordEmbedding:
         return h, prob
 
     def backward_pass(self, x, t, h, prob):
-        # output layer
+        # output layerp[]
         errors = prob - t
         grad_w1 = np.zeros_like(self.w[1])
         grad_b = np.zeros_like(self.b)
