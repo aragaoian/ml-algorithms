@@ -12,6 +12,6 @@ class ActivionFunctions:
         return x * rng.uniform(1.0, 100.0)
 
     @staticmethod
-    def softmax(x):
+    def softmax(x, axis: int | None = None):
         exp_x = np.exp(x - np.max(x))
-        return exp_x / np.sum(exp_x)
+        return exp_x / np.sum(exp_x, axis=axis)

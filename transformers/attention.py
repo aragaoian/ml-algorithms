@@ -16,21 +16,39 @@ class Attention:
         self.X = X
         self.y = y
         self.n_features = X.shape[0]
-        self.n_samples = X.shape[1]
+        self.n_embeddings = X.shape[1]
         self.n_iter = n_iter
         self.l_rate = l_rate
         rng = np.random.default_rng(seed)
         self.w = {
-            "q": rng.normal(0, 0.1, (self.n_samples, self.n_samples)),
-            "k": rng.normal(0, 0.1, (self.n_samples, self.n_samples)),
-            "v": rng.normal(0, 0.1, (self.n_samples, self.n_samples)),
+            "q": rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings)),
+            "k": rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings)),
+            "v": rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings)),
         }
         self.b = np.zeros((self.n_features, 1))
+        self.query = None
+        self.key = None
+        self.values = None
+        self.a = None
 
-    def fit(self):
-        query = self.X @ self.w["q"]
-        key = self.X @ self.w["k"]
-        values = self.X @ self.w["v"]
+    def foward_pass(self):
+        """ "Return attention head result"""
+        self.query = self.X @ self.w["q"]
+        self.key = self.X @ self.w["k"]
+        self.values = self.X @ self.w["v"]
 
-        a = ActivionFunctions.softmax(np.matmul(query, key.T)) / np.sqrt(key.shape[1])
-        z = a @ values
+        qkt = np.matmul(self.query, self.key.T)
+        mask = np.triu(np.ones_like(qkt), k=1) * -1e9
+        masked_qkt = qkt + mask
+        self.a = ActivionFunctions.softmax(masked_qkt / self.key.shape[1], axis=1)
+        return self.a @ self.values
+
+    def backward_pass():
+        # TODO
+        # recieve dZ (next layer error)
+        # update Wq, Wk, Wv
+        # return dX (embedding layer)
+        raise NotImplementedError
+
+    def fit():
+        raise NotImplementedError
