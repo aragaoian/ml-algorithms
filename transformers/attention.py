@@ -25,7 +25,6 @@ class Attention:
             "k": rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings)),
             "v": rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings)),
         }
-        self.b = np.zeros((self.n_features, 1))
         self.query = None
         self.key = None
         self.values = None
@@ -40,15 +39,27 @@ class Attention:
         qkt = np.matmul(self.query, self.key.T)
         mask = np.triu(np.ones_like(qkt), k=1) * -1e9
         masked_qkt = qkt + mask
-        self.a = ActivionFunctions.softmax(masked_qkt / self.key.shape[1], axis=1)
+        scores = masked_qkt / np.sqrt(self.key.shape[1])
+        self.a = ActivionFunctions.softmax(scores, axis=1)
         return self.a @ self.values
 
-    def backward_pass():
-        # TODO
-        # recieve dZ (next layer error)
-        # update Wq, Wk, Wv
-        # return dX (embedding layer)
-        raise NotImplementedError
+    def backward_pass(self, dZ):
+        # Values
+        dV = self.a.T @ dZ  # (n, 2)
 
-    def fit():
-        raise NotImplementedError
+        # Attention W
+        dA = dZ @ self.values.T  # (n, 2)
+
+        # Raw Scores (S)
+        dS = self.a * (dA - np.sum(dA * self.a, axis=1, keepdims=True))  # (n, n)
+
+        # Queries and Keys
+        d = self.key.shape[1]
+        dQ = (dS @ self.key) / np.sqrt(d)  # (n, 2)
+        dK = (dS.T @ self.query) / np.sqrt(d)  # (n, 2)
+
+        return {
+            "grad_wq": self.X.T @ dQ,
+            "grad_wk": self.X.T @ dK,
+            "grad_wv": self.X.T @ dV,
+        }
