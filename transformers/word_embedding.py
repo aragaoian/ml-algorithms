@@ -58,20 +58,19 @@ class WordEmbedding:
         return grad_w0, grad_w1, grad_b
 
     def fit(self):
-        for epoch in range(self.n_iter):
-            total_loss = 0.0
-            for s in range(self.n_samples):
-                x = self.X[:, s].reshape(-1, 1)
-                t = self.y[:, s].reshape(-1, 1)
+        total_loss = 0.0
+        for s in range(self.n_samples):
+            x = self.X[:, s].reshape(-1, 1)
+            t = self.y[:, s].reshape(-1, 1)
 
-                h, prob = self.forward_pass(x)
-                total_loss += -np.sum(t * np.log(prob + 1e-12))
+            h, prob = self.forward_pass(x)
+            total_loss += -np.sum(t * np.log(prob + 1e-12))
 
-                grad_w0, grad_w1, grad_b = self.backward_pass(x, t, h, prob)
+            grad_w0, grad_w1, grad_b = self.backward_pass(x, t, h, prob)
 
-                self.w[0] -= self.l_rate * grad_w0
-                self.w[1] -= self.l_rate * grad_w1
-                self.b -= self.l_rate * grad_b
+            self.w[0] -= self.l_rate * grad_w0
+            self.w[1] -= self.l_rate * grad_w1
+            self.b -= self.l_rate * grad_b
 
     def embeddings(self):
         return self.w[0]

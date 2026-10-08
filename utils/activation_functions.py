@@ -15,3 +15,13 @@ class ActivionFunctions:
     def softmax(x, axis: int | None = None):
         exp_x = np.exp(x - np.max(x))
         return exp_x / np.sum(exp_x, axis=axis)
+
+    @staticmethod
+    def relu(x):
+        return np.max(0, x)
+
+    @staticmethod
+    def gelu(x):
+        """Tanh approximation"""
+        inside = 1 + np.tanh((np.sqrt(2 / np.pi) * (x + 0.044715 * np.power(x, 3))))
+        return 1 / 2 * x * inside
