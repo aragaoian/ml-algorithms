@@ -18,7 +18,7 @@ class ActivionFunctions:
 
     @staticmethod
     def relu(x):
-        return np.max(0, x)
+        return np.maximum(0, x)
 
     @staticmethod
     def gelu(x):
