@@ -43,23 +43,25 @@ class Attention:
         self.a = ActivionFunctions.softmax(scores, axis=1)
         return self.a @ self.values
 
-    def backward_pass(self, dZ):
-        # Values
-        dV = self.a.T @ dZ  # (n, 2)
+    def backward_pass(self, grad_out):
+        # values
+        grad_v = self.a.T @ grad_out  # (n, 2)
 
-        # Attention W
-        dA = dZ @ self.values.T  # (n, 2)
+        # attention W
+        grad_att = grad_out @ self.values.T  # (n, 2)
 
-        # Raw Scores (S)
-        dS = self.a * (dA - np.sum(dA * self.a, axis=1, keepdims=True))  # (n, n)
+        # raw scores
+        grad_rs = self.a * (
+            grad_att - np.sum(grad_att * self.a, axis=1, keepdims=True)
+        )  # (n, n)
 
-        # Queries and Keys
-        d = self.key.shape[1]
-        dQ = (dS @ self.key) / np.sqrt(d)  # (n, 2)
-        dK = (dS.T @ self.query) / np.sqrt(d)  # (n, 2)
+        # queries and keys
+        d_key = self.key.shape[1]
+        grad_q = (grad_rs @ self.key) / np.sqrt(d_key)  # (n, 2)
+        grad_k = (grad_rs.T @ self.query) / np.sqrt(d_key)  # (n, 2)
 
         return {
-            "grad_wq": self.X.T @ dQ,
-            "grad_wk": self.X.T @ dK,
-            "grad_wv": self.X.T @ dV,
+            "grad_wq": self.X.T @ grad_q,
+            "grad_wk": self.X.T @ grad_k,
+            "grad_wv": self.X.T @ grad_v,
         }
