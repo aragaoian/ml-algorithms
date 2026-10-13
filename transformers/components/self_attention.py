@@ -51,10 +51,7 @@ class SelfAttention:
         scores = qkt / np.sqrt(self.key.shape[1])
         self.a = ActivionFunctions.softmax(scores, axis=1)
         z = self.a @ self.values
-        # NOTE
-        # key and values are used
-        # as inputs for cross-attention
-        return z, self.key, self.values
+        return z
 
     def backward_pass(
         self, grad_out: npt.NDArray[np.float64]
@@ -65,7 +62,7 @@ class SelfAttention:
         grad_v = self.a.T @ grad_out  # (n, 2)
 
         # attention W
-        grad_att = grad_out @ self.values.T  # (n, 2)
+        grad_att = grad_out @ self.values.T  # (n, n)
 
         # raw scores
         grad_rs = self.a * (
@@ -77,9 +74,9 @@ class SelfAttention:
         grad_q = (grad_rs @ self.key) / np.sqrt(d_key)  # (n, 2)
         grad_k = (grad_rs.T @ self.query) / np.sqrt(d_key)  # (n, 2)
 
-        self.grad_w["grad_wq"] = (self.x.T @ grad_q,)
-        self.grad_w["grad_wk"] = (self.x.T @ grad_k,)
-        self.grad_w["grad_wv"] = (self.x.T @ grad_v,)
+        self.grad_w["grad_wq"] = self.x.T @ grad_q
+        self.grad_w["grad_wk"] = self.x.T @ grad_k
+        self.grad_w["grad_wv"] = self.x.T @ grad_v
         self.grad_x = (
             grad_q @ self.w["q"].T + grad_k @ self.w["k"].T + grad_v @ self.w["v"].T
         )
@@ -95,6 +92,6 @@ class SelfAttention:
         self.grad_x = None
 
     def update_weights(self, l_rate: float) -> None:
-        self.grad_w["q"] -= l_rate * self.grad_w["grad_wq"]
-        self.grad_w["k"] -= l_rate * self.grad_w["grad_wk"]
-        self.grad_w["v"] -= l_rate * self.grad_w["grad_wv"]
+        self.w["q"] -= l_rate * self.grad_w["grad_wq"]
+        self.w["k"] -= l_rate * self.grad_w["grad_wk"]
+        self.w["v"] -= l_rate * self.grad_w["grad_wv"]

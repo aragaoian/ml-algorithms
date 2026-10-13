@@ -14,7 +14,7 @@ class ActivionFunctions:
     @staticmethod
     def softmax(x, axis: int | None = None):
         exp_x = np.exp(x - np.max(x))
-        return exp_x / np.sum(exp_x, axis=axis)
+        return exp_x / np.sum(exp_x, axis=axis, keepdims=True)
 
     @staticmethod
     def relu(x):

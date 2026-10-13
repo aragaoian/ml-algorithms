@@ -1,3 +1,4 @@
+import numpy as np
 import numpy.typing as npt
 
 from transformers.components.feed_foward import Feedfoward
@@ -16,11 +17,9 @@ class Encoder:
         self.self_att = SelfAttention(n_features, n_samples, seed=seed + 2)
         self.ff = Feedfoward(n_features, n_samples, seed=seed + 3)
 
-    def foward_pass(
-        self, x: npt.NDArray[np.float64]
-    ) -> npt.NDArray[np.float64]:
+    def foward_pass(self, x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         embeddings = self.we.forward_pass(x)
-        pos_encoded_embeddings = self.pe(embeddings)
+        pos_encoded_embeddings = self.pe.generate(embeddings)
 
         z_att = self.self_att.foward_pass(pos_encoded_embeddings, masked_att=False)
         z_ff = self.ff.forward_pass(z_att)
@@ -37,5 +36,6 @@ class Encoder:
         self.we.update_weights(l_rate)
         self.self_att.update_weights(l_rate)
         self.ff.update_weights(l_rate)
-import numpy.typing as npt
 
+
+import numpy.typing as npt
