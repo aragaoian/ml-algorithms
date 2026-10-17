@@ -8,21 +8,21 @@ from transformers.components.word_embedding import WordEmbedding
 
 
 class Encoder:
-    def __init__(self, n_features: int, n_samples: int, seed: int) -> None:
-        self.n_features = n_features
-        self.n_samples = n_samples
+    def __init__(self, seed: int = 42) -> None:
         self.seed = seed
-        self.we = WordEmbedding(n_features, n_samples, seed=seed + 1)
+        self.we = WordEmbedding(seed=self.seed + 1)
         self.pe = PositionalEncoder()
-        self.self_att = SelfAttention(n_features, n_samples, seed=seed + 2)
-        self.ff = Feedfoward(n_features, n_samples, seed=seed + 3)
+        self.self_att = SelfAttention(seed=self.seed + 2)
+        self.ff = Feedfoward(seed=self.seed + 3)
 
     def foward_pass(self, x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-        embeddings = self.we.forward_pass(x)
-        pos_encoded_embeddings = self.pe.generate(embeddings)
+        embeddings = self.we.forward_pass(x)  # (n, 2) -> for h = 2
+        pos_encoded_embeddings = self.pe.generate(embeddings)  # (n, 2)
 
-        z_att = self.self_att.foward_pass(pos_encoded_embeddings, masked_att=False)
-        z_ff = self.ff.forward_pass(z_att)
+        z_att = self.self_att.foward_pass(
+            pos_encoded_embeddings, masked_att=False
+        )  # (n, 2)
+        z_ff = self.ff.forward_pass(z_att)  # (n, 2)
 
         return z_ff
 
@@ -36,6 +36,3 @@ class Encoder:
         self.we.update_weights(l_rate)
         self.self_att.update_weights(l_rate)
         self.ff.update_weights(l_rate)
-
-
-import numpy.typing as npt

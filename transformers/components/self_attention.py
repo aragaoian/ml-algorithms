@@ -7,19 +7,12 @@ from utils.activation_functions import ActivionFunctions
 class SelfAttention:
     def __init__(
         self,
-        n_features: int,
-        n_embeddings: int,
         seed: int = 42,
     ) -> None:
-        self.n_features = n_features
-        self.n_embeddings = n_embeddings
-
-        rng = np.random.default_rng(seed)
-        self.w = {
-            "q": rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings)),
-            "k": rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings)),
-            "v": rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings)),
-        }
+        self.n_features: int | None = None
+        self.n_embeddings: int | None = None
+        self.seed = seed
+        self.w = None
         self.grad_w = {
             "grad_wq": None,
             "grad_wk": None,
@@ -39,6 +32,14 @@ class SelfAttention:
         npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]
     ]:
         """ "Return attention head result"""
+        self.n_features, self.n_embeddings = x.shape
+        if self.w is None:
+            rng = np.random.default_rng(self.seed)
+            self.w = {
+                name: rng.normal(0, 0.1, (self.n_embeddings, self.n_embeddings))
+                for name in ("q", "k", "v")
+            }
+
         self.x = x
         self.query = x @ self.w["q"]
         self.key = x @ self.w["k"]
@@ -50,7 +51,7 @@ class SelfAttention:
             qkt += mask
         scores = qkt / np.sqrt(self.key.shape[1])
         self.a = ActivionFunctions.softmax(scores, axis=1)
-        z = self.a @ self.values
+        z = self.a @ self.values  # (n, n) @ (n, e) -> (n, e)
         return z
 
     def backward_pass(
