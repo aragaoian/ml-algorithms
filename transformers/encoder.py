@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 
-from transformers.components.feed_foward import Feedfoward
+from transformers.components.feed_foward import FeedFoward
 from transformers.components.positional_encoder import PositionalEncoder
 from transformers.components.self_attention import SelfAttention
 from transformers.components.word_embedding import WordEmbedding
@@ -13,7 +13,7 @@ class Encoder:
         self.we = WordEmbedding(seed=self.seed + 1)
         self.pe = PositionalEncoder()
         self.self_att = SelfAttention(seed=self.seed + 2)
-        self.ff = Feedfoward(seed=self.seed + 3)
+        self.ff = FeedFoward(seed=self.seed + 3)
 
     def foward_pass(self, x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         embeddings = self.we.forward_pass(x)  # (n, 2) -> for h = 2
