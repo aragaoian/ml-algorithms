@@ -4,7 +4,7 @@ import numpy.typing as npt
 from utils.activation_functions import ActivionFunctions
 
 
-class FeedFoward:
+class FeedForward:
     def __init__(
         self,
         layers: int = 2,

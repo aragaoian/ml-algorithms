@@ -2,7 +2,7 @@ import numpy as np
 import numpy.typing as npt
 
 from transformers.components.cross_attention import CrossAttention
-from transformers.components.feed_foward import FeedFoward
+from transformers.components.feed_foward import FeedForward
 from transformers.components.linear_layer import LinearLayer
 from transformers.components.positional_encoder import PositionalEncoder
 from transformers.components.self_attention import SelfAttention
@@ -20,7 +20,7 @@ class Decoder:
         self.pe = PositionalEncoder()
         self.self_att = SelfAttention(seed=self.seed + 5)
         self.cross_att = CrossAttention(seed=self.seed + 6)
-        self.ff = FeedFoward(seed=self.seed + 7)
+        self.ff = FeedForward(seed=self.seed + 7)
         self.linear = LinearLayer(self.n_out, seed=seed + 8)
 
     def foward_pass(
