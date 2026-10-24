@@ -26,7 +26,7 @@ class SelfAttention:
         self.values = None
         self.a = None
 
-    def foward_pass(
+    def forward_pass(
         self, x: npt.NDArray[np.float64], masked_att: bool = False
     ) -> tuple[
         npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]

@@ -23,25 +23,30 @@ class Decoder:
         self.ff = FeedForward(seed=self.seed + 7)
         self.linear = LinearLayer(self.n_out, seed=seed + 8)
 
-    def foward_pass(
+    def forward_pass(
         self,
         x: npt.NDArray[np.float64],
         encoder_z: npt.NDArray[np.float64],
-    ) -> npt.NDArray[np.float64]:
+        y: npt.NDArray[np.float64] | None = None,
+    ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64] | None]:
         embeddings = self.we.forward_pass(x)  # (n, 2) -> for h = 2
         pos_encoded_embeddings = self.pe.generate(embeddings)  # (n, 2)
 
-        z_self_att = self.self_att.foward_pass(
+        z_self_att = self.self_att.forward_pass(
             pos_encoded_embeddings, masked_att=True
         )  # (n, 2)
-        z_cross_att = self.cross_att.foward_pass(z_self_att, encoder_z)  # (n, 2)
+        z_cross_att = self.cross_att.forward_pass(z_self_att, encoder_z)  # (n, 2)
         z_ff = self.ff.forward_pass(z_cross_att)  # (n, 2)
         z_linear = self.linear.forward_pass(z_ff)  # (n, vocab_size/n_out)
         self.probs = ActivionFunctions.softmax(
             z_linear, axis=1
         )  # (n, vocab_size/n_out)
 
-        return self.probs
+        # NOTE
+        # cross-entropy loss
+        loss = -np.sum(x * np.log(y)) if y is not None else None
+
+        return self.probs, loss
 
     def backward_pass(
         self,

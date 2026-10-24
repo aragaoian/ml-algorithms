@@ -28,7 +28,7 @@ class CrossAttention:
         self.x = None
         self.z = None
 
-    def foward_pass(
+    def forward_pass(
         self,
         x: npt.NDArray[np.float64],
         z: npt.NDArray[np.float64],

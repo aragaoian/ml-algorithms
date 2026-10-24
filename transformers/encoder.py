@@ -15,11 +15,11 @@ class Encoder:
         self.self_att = SelfAttention(seed=self.seed + 2)
         self.ff = FeedForward(seed=self.seed + 3)
 
-    def foward_pass(self, x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    def forward_pass(self, x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         embeddings = self.we.forward_pass(x)  # (n, 2) -> for h = 2
         pos_encoded_embeddings = self.pe.generate(embeddings)  # (n, 2)
 
-        z_att = self.self_att.foward_pass(
+        z_att = self.self_att.forward_pass(
             pos_encoded_embeddings, masked_att=False
         )  # (n, 2)
         z_ff = self.ff.forward_pass(z_att)  # (n, 2)

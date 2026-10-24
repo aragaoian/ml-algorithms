@@ -23,5 +23,5 @@ class ActivionFunctions:
     @staticmethod
     def gelu(x):
         """Tanh approximation"""
-        inside = 1 + np.tanh((np.sqrt(2 / np.pi) * (x + 0.044715 * np.power(x, 3))))
+        inside = 1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * np.power(x, 3)))
         return 1 / 2 * x * inside
