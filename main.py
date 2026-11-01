@@ -1,12 +1,11 @@
 import numpy as np
 
+from transformers.data.words import PAIRS, PT, encode_pairs
 from transformers.transformer import Transformer
 
-VOCAB = ["I", "love", "my", "girlfriend", "<EOS>"]
+train, test = encode_pairs(PAIRS)
 
-eye = np.eye(5)
-X = eye[:, :4]  # I, love, my, girlfriend
-y = eye[:, 1:]  # love, my, girlfriend, <EOS>
+t = Transformer(decoder_n_out=len(PT))
+loss = t.fit(train)
 
-t = Transformer(len(VOCAB))
-t.fit(X, y)
+print(loss)

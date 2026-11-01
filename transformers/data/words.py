@@ -1,6 +1,8 @@
 import numpy as np
+import numpy.typing as npt
 
-EN = ["I", "love", "see", "want", "my", "girlfriend", "dog", "house", "book", "<EOS>"]
+EOS_TAG = "<EOS>"
+EN = ["I", "love", "see", "want", "my", "girlfriend", "dog", "house", "book", EOS_TAG]
 PT = [
     "Eu",
     "amo",
@@ -12,7 +14,7 @@ PT = [
     "cachorro",
     "casa",
     "livro",
-    "<EOS>",
+    EOS_TAG,
 ]
 
 EN_IDX = {w: i for i, w in enumerate(EN)}
@@ -35,6 +37,38 @@ PAIRS = [
     ("I see my book", "Eu vejo meu livro"),
 ]
 
-# TODO
-# one-hot encode rows and cols
-# train_test _split
+
+def tokens(sentence: str) -> list[str]:
+    return sentence.split() + [EOS_TAG]
+
+
+def ohe_columns(words: list, indexes: dict) -> npt.NDArray:
+    arr = np.zeros((len(indexes), len(words)))
+    for pos, word in enumerate(words):
+        arr[indexes[word]][pos] = 1.0
+
+    return arr
+
+
+def encode_pairs(pairs: list[tuple], split: float = 0.2) -> tuple[list[tuple]]:
+    # NOTE
+    # for the sake of reproducibility and simplicity the split
+    # will be done by separating roughly 20% (floored) of the dataset
+    # (the last 2 pairs)
+    split_idx = int(np.floor(len(pairs) * split))
+    encoded_pairs = []
+
+    for first, second in pairs:
+        source = tokens(first)
+        target = tokens(second)
+        decoder_input = [EOS_TAG] + tokens(second)[:-1]
+
+        encoded_source = ohe_columns(source, EN_IDX)
+        encoded_target = ohe_columns(target, PT_IDX)
+        encoded_decoder_input = ohe_columns(decoder_input, PT_IDX)
+
+        encoded_pairs.append((encoded_source, encoded_decoder_input, encoded_target))
+
+    # NOTE
+    # return tuple(train, test)
+    return encoded_pairs[:-split_idx], encoded_pairs[-split_idx:]

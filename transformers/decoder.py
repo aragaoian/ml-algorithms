@@ -53,7 +53,7 @@ class Decoder:
         y: npt.NDArray[np.float64],
         l_rate: float,
     ) -> npt.NDArray[np.float64]:
-        grad_probs = (self.probs - y) / self.probs.shape[0]
+        grad_probs = (self.probs - y.T) / self.probs.shape[0]
         grad_linear = self.linear.backward_pass(grad_probs)
         grad_ff = self.ff.backward_pass(grad_linear)
         grad_decoder, grad_encoder = self.cross_att.backward_pass(grad_ff)

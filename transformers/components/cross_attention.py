@@ -51,6 +51,11 @@ class CrossAttention:
 
         qkt = np.matmul(self.query, self.key.T)
         scores = qkt / np.sqrt(self.key.shape[1])
+        # TODO
+        # see if the grads are exploding
+        # Disclaimer: they are 3.7871946849959288e-06
+        # FIX IT
+        print(np.abs(scores).max())
         self.a = ActivionFunctions.softmax(scores, axis=1)
         z = self.a @ self.values
         return z
