@@ -43,9 +43,9 @@ PAIRS = [
     ("I see my girlfriend", "Eu vejo minha namorada"),
     ("I see my dog", "Eu vejo meu cachorro"),
     ("I see my house", "Eu vejo minha casa"),
-    ("I see my book", "Eu vejo meu livro"),
     ("I want my girlfriend", "Eu quero minha namorada"),
     ("I want my dog", "Eu quero meu cachorro"),
+    ("I want my book", "Eu quero meu livro"),
     ("I want my house", "Eu quero minha casa"),
     ("I see my book", "Eu vejo meu livro"),
 ]

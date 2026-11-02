@@ -24,3 +24,6 @@ print("Predicted:", [PT[token] for token in predicted_tokens])
 # Predicted: ['Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu', 'Eu']
 
 # I fixed some stuff but the model still underfits
+# TODO
+# 1. Add residual connections
+# 2. Add LayerNorm
