@@ -2,7 +2,21 @@ import numpy as np
 import numpy.typing as npt
 
 EOS_TAG = "<EOS>"
-EN = ["I", "love", "see", "want", "my", "girlfriend", "dog", "house", "book", EOS_TAG]
+BOS_TAG = "<BOS>"
+
+EN = [
+    "I",
+    "love",
+    "see",
+    "want",
+    "my",
+    "girlfriend",
+    "dog",
+    "house",
+    "book",
+    BOS_TAG,
+    EOS_TAG,
+]
 PT = [
     "Eu",
     "amo",
@@ -14,6 +28,7 @@ PT = [
     "cachorro",
     "casa",
     "livro",
+    BOS_TAG,
     EOS_TAG,
 ]
 
@@ -31,8 +46,6 @@ PAIRS = [
     ("I see my book", "Eu vejo meu livro"),
     ("I want my girlfriend", "Eu quero minha namorada"),
     ("I want my dog", "Eu quero meu cachorro"),
-    ("I want my house", "Eu quero minha casa"),
-    ("I want my book", "Eu quero meu livro"),
     ("I want my house", "Eu quero minha casa"),
     ("I see my book", "Eu vejo meu livro"),
 ]
@@ -61,7 +74,7 @@ def encode_pairs(pairs: list[tuple], split: float = 0.2) -> tuple[list[tuple]]:
     for first, second in pairs:
         source = tokens(first)
         target = tokens(second)
-        decoder_input = [EOS_TAG] + tokens(second)[:-1]
+        decoder_input = [BOS_TAG] + tokens(second)[:-1]
 
         encoded_source = ohe_columns(source, EN_IDX)
         encoded_target = ohe_columns(target, PT_IDX)

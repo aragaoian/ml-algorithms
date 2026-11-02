@@ -44,7 +44,16 @@ class Decoder:
 
         # NOTE
         # cross-entropy loss
-        loss = -np.sum(x * np.log(y)) if y is not None else None
+        # log(0) was the main issue. However
+        # probs can be so small, it can output inf/inf divs
+        # NOTE
+        # after cliping the logs probs, it went
+        # from np.float64(inf) -> np.float64(2.396503802363904)
+        epsilon = np.finfo(self.probs.dtype).eps
+        loss = None
+        if y is not None:
+            loss = -np.sum(y.T * np.log(np.clip(self.probs, epsilon, 1.0)))
+            loss /= self.probs.shape[0]
 
         return self.probs, loss
 

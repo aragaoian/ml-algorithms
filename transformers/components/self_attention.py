@@ -47,7 +47,8 @@ class SelfAttention:
 
         qkt = np.matmul(self.query, self.key.T)
         if masked_att:
-            mask = np.triu(np.ones_like(qkt), k=1) * -1e9
+            mask_value = np.finfo(qkt.dtype).min
+            mask = np.triu(np.ones_like(qkt), k=1) * mask_value
             qkt += mask
         scores = qkt / np.sqrt(self.key.shape[1])
         self.a = ActivionFunctions.softmax(scores, axis=1)

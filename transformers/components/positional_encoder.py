@@ -6,12 +6,16 @@ class PositionalEncoder:
     def __init__(self) -> None:
         pass
 
-    def generate(self, embeddings: npt.NDArray[np.float16]) -> npt.NDArray[np.float16]:
-        n_features, n_samples = embeddings.shape
-        sin_cos_arr = np.zeros_like(embeddings)
-        for pos in range(n_features):
-            for s in range(n_samples):
-                sin_cos_arr[pos][s] = np.sin(pos)
-                sin_cos_arr[pos][s] = np.cos(s)
+    def generate(self, embeddings: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        sequence_length, hidden_size = embeddings.shape
+        positions = np.arange(sequence_length)[:, np.newaxis]
+        dimensions = np.arange(hidden_size)[np.newaxis, :]
+        angle_rates = 1 / np.power(
+            10000, (2 * (dimensions // 2)) / hidden_size
+        )
+        angles = positions * angle_rates
 
-        return embeddings + sin_cos_arr
+        positional_encoding = np.empty_like(embeddings)
+        positional_encoding[:, 0::2] = np.sin(angles[:, 0::2])
+        positional_encoding[:, 1::2] = np.cos(angles[:, 1::2])
+        return embeddings + positional_encoding

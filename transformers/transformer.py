@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 from rich.progress import track
 
-from transformers.data.words import EOS_TAG, PT_IDX, ohe_columns
+from transformers.data.words import BOS_TAG, EOS_TAG, PT, PT_IDX, ohe_columns
 from transformers.decoder import Decoder
 from transformers.encoder import Encoder
 
@@ -31,8 +31,7 @@ class Transformer:
         random.seed(seed)
 
     def _decoder_input(self) -> npt.NDArray:
-        eos_token = [EOS_TAG]
-        return ohe_columns(eos_token, PT_IDX)
+        return ohe_columns([BOS_TAG], PT_IDX)
 
     def fit(self, pairs: list[tuple[npt.NDArray, npt.NDArray, npt.NDArray]]) -> None:
         self.loss_history = []
@@ -57,15 +56,24 @@ class Transformer:
 
         return self.loss_history
 
-    def predict(self, X_encoder: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    def predict(
+        self, X_encoder: npt.NDArray[np.float64]
+    ) -> tuple[npt.NDArray[np.float64], list]:
         encoder_z = self.encoder.forward_pass(X_encoder)
         X_decoder = self._decoder_input()
 
+        predicted_tokens = []
+
         for _ in range(MAX_LOOP_LEN):
             probs, _ = self.decoder.forward_pass(X_decoder, encoder_z)
-            predict_token = np.argmax(probs[-1])
-            if predict_token == PT_IDX[EOS_TAG]:
-                return probs
-            X_decoder = np.append(X_decoder, predict_token, axis=0)
+            predicted_token = np.argmax(probs[-1])
+            predicted_tokens.append(predicted_token)
 
-        return X_decoder
+            ohe_token = ohe_columns([PT[predicted_token]], PT_IDX)
+            X_decoder = np.append(X_decoder, ohe_token, axis=1)
+            predicted_tokens.append(predicted_token)
+
+            if predicted_token == PT_IDX[EOS_TAG]:
+                return X_decoder, predicted_tokens
+
+        return X_decoder, predicted_tokens
