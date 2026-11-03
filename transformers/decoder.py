@@ -32,11 +32,14 @@ class Decoder:
         embeddings = self.we.forward_pass(x)  # (n, 2) -> for h = 2
         pos_encoded_embeddings = self.pe.generate(embeddings)  # (n, 2)
 
-        z_self_att = self.self_att.forward_pass(
-            pos_encoded_embeddings, masked_att=True
+        z_self_att = (
+            self.self_att.forward_pass(pos_encoded_embeddings, masked_att=True)
+            + pos_encoded_embeddings
         )  # (n, 2)
-        z_cross_att = self.cross_att.forward_pass(z_self_att, encoder_z)  # (n, 2)
-        z_ff = self.ff.forward_pass(z_cross_att)  # (n, 2)
+        z_cross_att = (
+            self.cross_att.forward_pass(z_self_att, encoder_z) + z_self_att
+        )  # (n, 2)
+        z_ff = self.ff.forward_pass(z_cross_att) + z_cross_att  # (n, 2)
         z_linear = self.linear.forward_pass(z_ff)  # (n, vocab_size/n_out)
         self.probs = ActivionFunctions.softmax(
             z_linear, axis=1
@@ -64,9 +67,10 @@ class Decoder:
     ) -> npt.NDArray[np.float64]:
         grad_probs = (self.probs - y.T) / self.probs.shape[0]
         grad_linear = self.linear.backward_pass(grad_probs)
-        grad_ff = self.ff.backward_pass(grad_linear)
+        grad_ff = self.ff.backward_pass(grad_linear) + grad_linear
         grad_decoder, grad_encoder = self.cross_att.backward_pass(grad_ff)
-        grad_self_att = self.self_att.backward_pass(grad_decoder)
+        grad_decoder += grad_ff
+        grad_self_att = self.self_att.backward_pass(grad_decoder) + grad_decoder
         self.we.backward_pass(grad_self_att)
 
         self.we.update_weights(l_rate)

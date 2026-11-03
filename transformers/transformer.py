@@ -71,7 +71,6 @@ class Transformer:
 
             ohe_token = ohe_columns([PT[predicted_token]], PT_IDX)
             X_decoder = np.append(X_decoder, ohe_token, axis=1)
-            predicted_tokens.append(predicted_token)
 
             if predicted_token == PT_IDX[EOS_TAG]:
                 return X_decoder, predicted_tokens

@@ -19,18 +19,19 @@ class Encoder:
         embeddings = self.we.forward_pass(x)  # (n, 2) -> for h = 2
         pos_encoded_embeddings = self.pe.generate(embeddings)  # (n, 2)
 
-        z_att = self.self_att.forward_pass(
-            pos_encoded_embeddings, masked_att=False
+        z_att = (
+            self.self_att.forward_pass(pos_encoded_embeddings, masked_att=False)
+            + pos_encoded_embeddings
         )  # (n, 2)
-        z_ff = self.ff.forward_pass(z_att)  # (n, 2)
+        z_ff = self.ff.forward_pass(z_att) + z_att  # (n, 2)
 
         return z_ff
 
     def backward_pass(
         self, decoder_grad: npt.NDArray[np.float64], l_rate: float
     ) -> None:
-        grad_z = self.ff.backward_pass(decoder_grad)
-        grad_x = self.self_att.backward_pass(grad_z)
+        grad_z = self.ff.backward_pass(decoder_grad) + decoder_grad
+        grad_x = self.self_att.backward_pass(grad_z) + grad_z
         self.we.backward_pass(grad_x)
 
         self.we.update_weights(l_rate)
